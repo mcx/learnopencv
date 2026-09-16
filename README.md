@@ -30,6 +30,7 @@ This repository contains code for Computer Vision, Deep learning, and AI researc
 
 | Blog Post | Code|
 | ------------- |:-------------|
+| [Train RF-DETR for Instance Segmentation with GPT-6 Astra](https://learnopencv.com/astra-rf-detr-microduck-segmentation/) |  |
 | [How 10x AI Engineers Train Models for Production: Lessons from PINTO's Face Alignment Project](https://learnopencv.com/how-10x-ai-engineers-train-models-for-production/) |  |
 | [SAM-3: What’s New, How It Works, and Why It Matters](https://learnopencv.com/sam-3-whats-new/) [Updated] | [Code](https://github.com/spmallick/learnopencv/tree/master/SAM-3) |
 | [VGGT vs. VGGT-Ω (VGGT-Omega): A Complete Guide to Feed-Forward 3D Reconstruction](https://learnopencv.com/vggt-vs-vggt-%cf%89-vggt-omega-a-complete-guide-to-feed-forward-3d-reconstruction/) | [Code](https://github.com/spmallick/learnopencv/tree/master/VGGT-vs-VGGT-Omega-3D-Reconstruction) |
