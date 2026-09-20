@@ -6,7 +6,7 @@ masks without installing PyTorch or downloading the checkpoint.
 
 [<img src="./featured_image_SAM_3.jpg" alt="SAM 3 Promptable Concept Segmentation" width="100%">](https://learnopencv.com/sam-3-whats-new/)
 
-[<img src="https://learnopencv.com/wp-content/uploads/2022/07/download-button-e1657285155454.png" alt="Download Code" width="200">](https://github.com/spmallick/learnopencv/releases/download/sam-3-1-video-tracking-2026.08.30-r2/SAM-3.zip)
+[<img src="https://learnopencv.com/wp-content/uploads/2022/07/download-button-e1657285155454.png" alt="Download Code" width="200">](https://github.com/spmallick/learnopencv/releases/download/sam-3-1-api-notebooks-2026.09.20/SAM-3.zip)
 
 ## What This Example Does
 
