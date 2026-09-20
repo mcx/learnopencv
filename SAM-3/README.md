@@ -1,13 +1,12 @@
 # [SAM-3: What’s New, How It Works, and Why It Matters](https://learnopencv.com/sam-3-whats-new/)
 
-**Updated August 30, 2026:** This companion now uses Meta's SAM 3.1 Object
-Multiplex video predictor. The previous notebook applied the image processor to
-each frame independently, so it performed frame-by-frame concept segmentation
-rather than stateful tracking.
+**Updated September 20, 2026:** Includes native SAM 3.1 stateful video tracking
+and a separate Meta Model API notebook. The hosted example decodes segmentation
+masks without installing PyTorch or downloading the checkpoint.
 
 [<img src="./featured_image_SAM_3.jpg" alt="SAM 3 Promptable Concept Segmentation" width="100%">](https://learnopencv.com/sam-3-whats-new/)
 
-[<img src="https://learnopencv.com/wp-content/uploads/2022/07/download-button-e1657285155454.png" alt="Download Code" width="200">](https://github.com/spmallick/learnopencv/releases/download/sam-3-1-video-tracking-2026.08.30-r2/SAM-3.zip)
+[<img src="https://learnopencv.com/wp-content/uploads/2022/07/download-button-e1657285155454.png" alt="Download Code" width="200">](https://github.com/spmallick/learnopencv/releases/download/sam-3-1-api-notebooks-2026.09.20/SAM-3.zip)
 
 ## What This Example Does
 
@@ -18,10 +17,11 @@ separation is important: SAM 3.1 performs the temporal tracking; OpenCV handles
 video decoding and visualization.
 
 A text prompt is one concept phrase, such as `person wearing a red shirt`.
-Commas do not turn one string into a documented multi-label request. Run a
+In Meta’s native predictor and Meta Model API, commas do not turn one string
+into a documented multi-label request. Run a
 separate session when you need an independently defined concept.
 
-## Requirements
+## Native Tracking Requirements
 
 Meta's current SAM 3.1 installation requires:
 
@@ -29,7 +29,7 @@ Meta's current SAM 3.1 installation requires:
 - PyTorch 2.7 or newer; Meta's current tested command installs PyTorch 2.10
 - An NVIDIA CUDA GPU with CUDA 12.6 or newer
 - Access to the gated `facebook/sam3.1` checkpoint on Hugging Face
-- The latest code from Meta's official [SAM 3 repository](https://github.com/facebookresearch/sam3)
+- The pinned source revision below from Meta's official [SAM 3 repository](https://github.com/facebookresearch/sam3)
 - FFmpeg and FFprobe when the source audio should be preserved
 
 The optional FlashAttention 3 path can improve compatible GPU inference. The
@@ -50,13 +50,17 @@ SAM-3/
 ├── README.md
 ├── featured_image_SAM_3.jpg
 ├── requirements.txt
+├── requirements-api.txt
+├── sam3_meta_api.ipynb
+├── meta_sam31_video_api.py
 ├── sam3_inference.ipynb
 ├── sam3_video_tracking.py
 └── tests/
+    ├── test_meta_sam31_video_api.py
     └── test_sam3_video_tracking.py
 ```
 
-## Installation
+## Native Installation
 
 Download this companion through the button above, extract `SAM-3.zip`, open a
 terminal in the directory that contains the extracted folder, and enter it
@@ -127,19 +131,63 @@ python sam3_video_tracking.py \
 Compilation adds startup cost, so measure after warm-up and report the GPU,
 object count, video resolution, and software versions with any speed result.
 
-## Notebook
+## Notebooks
 
-`sam3_inference.ipynb` teaches the same stateful flow in small steps. It imports
-the tested functions from `sam3_video_tracking.py` rather than maintaining a
-second implementation.
+- `sam3_inference.ipynb` teaches the native stateful flow in small steps and
+  imports `sam3_video_tracking.py`. Use the pinned CUDA installation above.
+- `sam3_meta_api.ipynb` uses Meta Model API and needs no local GPU or checkpoint.
+  It uses notebook-native `await`, keeps credentials out of saved cells, and
+  decodes masks with their source frame indices and object IDs.
 
-## Tests
+Both notebooks start in the extracted `SAM-3` folder. Install JupyterLab in the
+chosen environment and open the corresponding notebook:
+
+```bash
+python -m pip install jupyterlab
+python -m jupyter lab
+```
+
+## Hosted Meta Model API
+
+For the hosted route, use Python 3.10 or newer in a separate environment from
+the CUDA setup.
+After extracting the package and entering `SAM-3`:
+
+```bash
+python3 -m venv .venv-api
+source .venv-api/bin/activate
+python -m pip install -r requirements-api.txt
+```
+
+Create a Meta Model API key and configure `MODEL_API_KEY` privately in your
+execution environment, or use the notebook's hidden credential prompt. Provide
+an authorized public MP4 or MOV URL. Account access and billing are required;
+Hugging Face checkpoint approval is a separate route.
+
+```bash
+python meta_sam31_video_api.py https://your-host/clip.mp4 --prompt person \
+  --output-dir api-output
+```
+
+The helper requests `sam-3.1`, saves decoded mask crops as PNG files, and writes
+a JSON manifest to `api-output`. The latest revision is retained for each frame and object. Frame indices and
+object IDs can be sparse; mask dimensions describe the crop rather than the full video
+frame. The returned box locates that crop in the source image.
+
+Meta's documented hosted limits are 15,000 input frames and 16 tracked objects
+per frame, with one concept phrase per request. The native checkpoint's
+16-object bucket width is different: native inference can use multiple buckets.
+The hosted notebook is an integration example, not a measured comparison with
+the native implementation. See the [segmentation guide](https://dev.meta.ai/docs/sam/segmenting)
+and [pricing](https://dev.meta.ai/docs/pricing-rate-limits) before making requests.
+
+## Validation
 
 Run the deterministic OpenCV and predictor-contract tests without downloading
 a checkpoint:
 
 ```bash
-python -m unittest discover -s tests -v
+python -m unittest discover -s tests -p "test_sam3_video_tracking.py" -v
 python -m py_compile sam3_video_tracking.py
 ```
 
@@ -149,6 +197,18 @@ stream when FFmpeg is available, keep the full video when audio ends early,
 cover the pinned upstream session regression, and decode the result. They do
 not measure SAM checkpoint accuracy or GPU performance; those require a
 compatible CUDA system and the gated model.
+
+The hosted client has separate offline tests using mocked HTTP responses and a
+published parser fixture. With `requirements-api.txt` installed, run:
+
+```bash
+python -m unittest discover -s tests -p "test_meta_sam31_video_api.py" -v
+```
+
+No successful hosted inference or full official-checkpoint inference was
+completed for this update. The checks cover client behavior, parsing, and the
+native companion's session and rendering logic; they do not establish model
+quality or throughput.
 
 ## Important Limitations
 
